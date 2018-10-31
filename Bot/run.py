@@ -2,8 +2,15 @@
 
 # This file contains all functions necessary to start up the bot
 
-# import discord
+import discord
+from message import respond
 
 
 def runbot(token):
-    pass
+    client = discord.Client()
+
+    @client.event
+    async def on_message(message):
+        respond(message, client)
+
+    client.run(token)
