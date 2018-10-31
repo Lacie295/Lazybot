@@ -6,5 +6,5 @@ import discord
 
 
 async def respond(message, client):
-    if message.author is not client.author:
+    if message.author != client.user:
         await client.send_message(message.channel, "hoi there")

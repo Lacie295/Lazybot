@@ -11,6 +11,6 @@ def runbot(token):
 
     @client.event
     async def on_message(message):
-        respond(message, client)
+        await respond(message, client)
 
     client.run(token)
