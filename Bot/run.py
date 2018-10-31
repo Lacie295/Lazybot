@@ -3,14 +3,14 @@
 # This file contains all functions necessary to start up the bot
 
 import discord
-from message import respond
+from discord.ext.commands import Bot
+from message_parser import init
 
 
 def runbot(token):
-    client = discord.Client()
+    client = Bot(command_prefix="!")
 
-    @client.event
-    async def on_message(message):
-        await respond(message, client)
+    init(client)
+
 
     client.run(token)
