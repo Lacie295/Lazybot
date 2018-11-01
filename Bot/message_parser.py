@@ -2,7 +2,7 @@
 
 # This file contains all functions necessary to reply to messages
 import time
-from threading import Timer
+from timer import Timer
 
 import discord
 
@@ -36,10 +36,11 @@ def init(client):
                 await client.ban(member, delete_message_days=0)
                 await client.say("banned {}".format(member.name))
             if unban_time >= 0:
-                time.sleep(unban_time)
-                for member in m.mentions:
-                    await client.unban(m.server, member)
-                    await client.say("unbanned {}".format(member.name))
+                async def unban_all():
+                    for mem in m.mentions:
+                        await client.unban(m.server, member)
+                        await client.send_message(m.channel, "unbanned {}".format(member.name))
+                t = Timer(unban_time, unban_all)
         else:
             await client.say("you do not have the permission to ban users")
 
