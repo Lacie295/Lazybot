@@ -2,6 +2,8 @@
 
 # This file contains all functions necessary to reply to messages
 import time
+import random
+
 from asynctimer import AsyncTimer
 
 import discord
@@ -89,3 +91,11 @@ def init(client):
             await client.say("Please provide a time (in minutes)")
         else:
             await client.say("you do not have the permission to ban users")
+
+    @client.event
+    async def on_message(message):
+        """responding to non command messages"""
+        if message.author != client.user:
+            if message.channel.name == "bots" and "yo bot" in message.content:
+                await client.send_message(message.channel,
+                                          client.messages[random.choice(range(len(client.messages)))].content)
