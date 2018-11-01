@@ -1,6 +1,8 @@
 # created by Sami Bosch on Wednesday, 31 October 2018
 
 # This file contains all functions necessary to reply to messages
+import time
+from threading import Timer
 
 import discord
 
@@ -10,16 +12,34 @@ def init(client):
 
     @client.command(aliases=['hey', 'hi', 'hello'], pass_context=True)
     async def ping(context):
-        await client.say("pong")
+        m = context.message
+        if m.content.find(" ") > 0:
+            user = m.server.get_member_named(m.content.split(" ")[1])
+            await client.say("pong {}".format(user.mention))
+        else:
+            await client.say("pong")
         await client.send_message(context.message.author, "pong, but in private")
 
     @client.command(pass_context=True)
     async def ban(context):
         m = context.message
+        if m.content.find(" ") > 0:
+            try:
+                unban_time = float(m.content.split(" ")[-1])
+            except ValueError:
+                unban_time = -1
+        else:
+            unban_time = -1
+
         if m.author.server_permissions.ban_members:
             for member in m.mentions:
                 await client.ban(member, delete_message_days=0)
                 await client.say("banned {}".format(member.name))
+            if unban_time >= 0:
+                time.sleep(unban_time)
+                for member in m.mentions:
+                    await client.unban(m.server, member)
+                    await client.say("unbanned {}".format(member.name))
         else:
             await client.say("you do not have the permission to ban users")
 

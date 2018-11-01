@@ -12,5 +12,4 @@ def runbot(token):
 
     init(client)
 
-
     client.run(token)
