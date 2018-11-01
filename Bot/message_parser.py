@@ -2,7 +2,7 @@
 
 # This file contains all functions necessary to reply to messages
 import time
-from timer import Timer
+from asynctimer import AsyncTimer
 
 import discord
 
@@ -12,6 +12,8 @@ def init(client):
 
     @client.command(aliases=['hey', 'hi', 'hello'], pass_context=True)
     async def ping(context):
+        """Responds with "pong" + a mention to the first username in the arguments if present. Also sends a pm to the
+        user using the command."""
         m = context.message
         if m.content.find(" ") > 0:
             user = m.server.get_member_named(m.content.split(" ")[1])
@@ -22,6 +24,8 @@ def init(client):
 
     @client.command(pass_context=True)
     async def ban(context):
+        """Takes a list of mentioned users + optionally an int. Bans all users in list, and if int has been supplied,
+        unbans them after given time."""
         m = context.message
         if m.content.find(" ") > 0:
             try:
@@ -40,12 +44,13 @@ def init(client):
                     for mem in m.mentions:
                         await client.unban(m.server, member)
                         await client.send_message(m.channel, "unbanned {}".format(member.name))
-                t = Timer(unban_time, unban_all)
+                t = AsyncTimer(unban_time, unban_all)
         else:
             await client.say("you do not have the permission to ban users")
 
     @client.command(pass_context=True)
     async def kick(context):
+        """Takes a list of mentioned users and kicks them all."""
         m = context.message
         if m.author.server_permissions.kick_members:
             for member in m.mentions:

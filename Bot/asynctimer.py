@@ -1,7 +1,8 @@
 import asyncio
 
 
-class Timer:
+class AsyncTimer:
+    """Used to put timers on async functions."""
     def __init__(self, timeout, callback):
         self._timeout = timeout
         self._callback = callback
