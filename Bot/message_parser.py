@@ -8,6 +8,9 @@ import discord
 from asynctimer import AsyncTimer
 import db_handler
 
+from utils import elem_in_string
+
+commands = ['yo bot', 'yea bot', 'yea boi']
 
 def init(client):
     client = client
@@ -96,7 +99,7 @@ def init(client):
     async def on_message(message):
         """responding to non command messages"""
         if message.author != client.user:
-            if message.channel.name == "bots" and "yo bot" in message.content:
+            if message.channel.name == "bots" and elem_in_string(commands,message.content):
                 await client.send_message(message.channel,
                                           client.messages[random.choice(range(len(client.messages)))].content)
         await client.process_commands(message)
