@@ -3,10 +3,10 @@
 # This file contains all functions necessary to reply to messages
 import time
 import random
+import discord
 
 from asynctimer import AsyncTimer
-
-import discord
+import db_handler
 
 
 def init(client):
