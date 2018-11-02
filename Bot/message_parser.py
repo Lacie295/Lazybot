@@ -99,3 +99,4 @@ def init(client):
             if message.channel.name == "bots" and "yo bot" in message.content:
                 await client.send_message(message.channel,
                                           client.messages[random.choice(range(len(client.messages)))].content)
+        await client.process_commands(message)
