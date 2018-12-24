@@ -7,7 +7,7 @@ from run import runbot
 import os
 
 
-config = '../config.json'
+config = 'config.json'
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, config)
 
