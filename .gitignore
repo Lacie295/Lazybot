@@ -105,3 +105,4 @@ venv.bak/
 
 # project specific
 config.json
+Bot/config.json
