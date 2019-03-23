@@ -96,7 +96,7 @@ def init(client):
         else:
             await client.say("you do not have the permission to ban users")
 
-    @client.command(pass_context=True)
+    @client.command(aliases=['qs'], pass_context=True)
     async def queue_song(context):
         m = context.message
         pos1 = m.content.find(" ")
