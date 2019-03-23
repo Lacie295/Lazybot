@@ -147,7 +147,7 @@ def init(client):
     y = x.replace(day=x.day + 1, hour=12, minute=0, second=0, microsecond=0)
     delta_t = y - x
 
-    secs = 1  # delta_t.seconds + 1
+    secs = delta_t.seconds + 1
 
     async def send_song():
         print("whoosh")
