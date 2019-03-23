@@ -1,16 +1,17 @@
 # created by Sami Bosch on Wednesday, 31 October 2018
 
 # This file contains all functions necessary to reply to messages
-import time
+from datetime import datetime
+import re
 import random
 import discord
-
 from asynctimer import AsyncTimer
 import db_handler
 
 from utils import elem_in_string
 
 commands = ['yo bot', 'yea bot', 'yea boi']
+
 
 def init(client):
     client = client
@@ -50,7 +51,7 @@ def init(client):
                     for member in m.mentions:
                         await client.unban(m.server, member)
                         await client.send_message(m.channel, "unbanned {}".format(member.name))
-                t = AsyncTimer(unban_time * 86400, unban_all)
+                AsyncTimer(unban_time * 86400, unban_all)
         else:
             await client.say("you do not have the permission to ban users")
 
@@ -95,6 +96,43 @@ def init(client):
         else:
             await client.say("you do not have the permission to ban users")
 
+    @client.command(pass_context=True)
+    async def queue_song(context):
+        m = context.message
+        pos1 = m.content.find(" ")
+        if pos1 > 0:
+            url = m.content.split(" ")[1]
+            regex = re.compile(
+                r'^(?:http|ftp)s?://'  # http:// or https://
+                r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+                r'localhost|'  # localhost...
+                r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+                r'(?::\d+)?'  # optional port
+                r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+            if re.match(regex, url) is not None:
+                comment = ""
+                pos2 = m.content[pos1:].strip().find(" ") + pos1 + 2
+                if pos2 > 0:
+                    comment = m.content[pos2:].strip()
+
+                db_handler.add_song_to_queue(url, m.author.name, comment)
+                await client.say("Added!")
+            else:
+                await client.say("Please provide a valid URL")
+        else:
+            await client.say("Please give at least an URL")
+
+    @client.command(pass_context=True)
+    async def set_song_channel(context):
+        m = context.message
+        if len(m.channel_mentions) > 0:
+            print(m.channel_mentions)
+            db_handler.set_server(m.server.id, m.channel_mentions[0].id)
+            await client.say("Channel {} configured".format(m.channel_mentions[0].mention))
+        else:
+            await client.say("Please provide a channel")
+
+
     @client.event
     async def on_message(message):
         """responding to non command messages"""
@@ -102,4 +140,32 @@ def init(client):
             if message.channel.name == "bots" and elem_in_string(commands,message.content):
                 await client.send_message(message.channel,
                                           client.messages[random.choice(range(len(client.messages)))].content)
+
         await client.process_commands(message)
+
+    x = datetime.today()
+    y = x.replace(day=x.day + 1, hour=12, minute=0, second=0, microsecond=0)
+    delta_t = y - x
+
+    secs = 1  # delta_t.seconds + 1
+
+    async def send_song():
+        print("whoosh")
+        song = db_handler.get_song()
+        if song is not None:
+            for s, c in db_handler.get_servers():
+                server = client.get_server(id=s)
+                channel = discord.utils.get(server.channels, id=c)
+                print(channel, server.name)
+                await client.send_message(channel, "Daily song: {}\nSubmitted by: {}\n{}".format(song[0], song[1],
+                                                                                                 song[2]).strip())
+        else:
+            print("whoosh3")
+            for s, c in db_handler.get_servers():
+                server = client.get_server(id=s)
+                channel = discord.utils.get(server.channels, id=c)
+                print(channel, server.name)
+                await client.send_message(channel, "No daily song today!")
+        AsyncTimer(86400, send_song)
+
+    AsyncTimer(secs, send_song)
