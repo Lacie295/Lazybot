@@ -47,6 +47,13 @@ def get_song():
         return e
 
 
+def has_song(url):
+    for u, _, _ in db['songs']:
+        if u == url:
+            return True
+    return False
+
+
 def set_server(server, channel):
     db['channels'].append((server, channel))
     write()
