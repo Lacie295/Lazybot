@@ -115,7 +115,7 @@ def init(client):
                 if pos2 > 0:
                     comment = m.content[pos2 + pos1 + 2:].strip()
 
-                if db_handler.has_song(url):
+                if not db_handler.has_song(url):
                     db_handler.add_song_to_queue(url, m.author.name, comment)
                     await client.say("Added!")
                 else:
