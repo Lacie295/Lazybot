@@ -59,5 +59,9 @@ def set_server(server, channel):
     write()
 
 
+def count_song():
+    return len(db['songs'])
+
+
 def get_servers():
     return db['channels']

@@ -51,6 +51,7 @@ def init(client):
                     for member in m.mentions:
                         await client.unban(m.server, member)
                         await client.send_message(m.channel, "unbanned {}".format(member.name))
+
                 AsyncTimer(unban_time * 86400, unban_all)
         else:
             await client.say("you do not have the permission to ban users")
@@ -135,12 +136,11 @@ def init(client):
         else:
             await client.say("Please provide a channel")
 
-
     @client.event
     async def on_message(message):
         """responding to non command messages"""
         if message.author != client.user:
-            if message.channel.name == "bots" and elem_in_string(commands,message.content):
+            if message.channel.name == "bots" and elem_in_string(commands, message.content):
                 await client.send_message(message.channel,
                                           client.messages[random.choice(range(len(client.messages)))].content)
 
@@ -153,22 +153,29 @@ def init(client):
     secs = delta_t.seconds + 1
 
     async def send_song():
-        print("whoosh")
         song = db_handler.get_song()
-        if song is not None:
-            for s, c in db_handler.get_servers():
-                server = client.get_server(id=s)
-                channel = discord.utils.get(server.channels, id=c)
-                print(channel, server.name)
-                await client.send_message(channel, "Daily song: {}\nSubmitted by: {}\n{}".format(song[0], song[1],
-                                                                                                 song[2]).strip())
-        else:
-            print("whoosh3")
-            for s, c in db_handler.get_servers():
-                server = client.get_server(id=s)
-                channel = discord.utils.get(server.channels, id=c)
-                print(channel, server.name)
-                await client.send_message(channel, "No daily song today!")
+        cnt = db_handler.count_song() / 15
+        cont = True
+        while cont:
+            if song is not None:
+                for s, c in db_handler.get_servers():
+                    server = client.get_server(id=s)
+                    channel = discord.utils.get(server.channels, id=c)
+                    print(channel, server.name)
+                    await client.send_message(channel, "Daily song: {}\nSubmitted by: {}\n{}".format(song[0], song[1],
+                                                                                                     song[2]).strip())
+            else:
+                for s, c in db_handler.get_servers():
+                    server = client.get_server(id=s)
+                    channel = discord.utils.get(server.channels, id=c)
+                    print(channel, server.name)
+                    await client.send_message(channel, "No daily song today!")
+                cont = False
+
+            cnt -= 1
+            if cnt == 0:
+                cont = False
+
         AsyncTimer(86400, send_song)
 
     AsyncTimer(secs, send_song)
