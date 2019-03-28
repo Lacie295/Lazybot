@@ -1,6 +1,7 @@
 # created by Sami Bosch on Wednesday, 31 October 2018
 
 # This file contains all functions necessary to reply to messages
+import asyncio
 from datetime import datetime
 import re
 import random
@@ -166,8 +167,11 @@ def init(client):
     secs = delta_t.seconds + 1
 
     async def send_song(timer=True):
+        print("oy")
         cnt = ceil(db_handler.count_song() / 15)
+        post_time = 86400 / cnt
         print(cnt)
+        i = 0
         cont = True
         while cont:
             song = db_handler.get_song()
@@ -185,8 +189,9 @@ def init(client):
                     await client.send_message(channel, "No daily song today!")
                 cont = False
 
-            cnt -= 1
-            if cnt == 0:
+            await asyncio.sleep(post_time)
+            i += 1
+            if i >= cnt:
                 cont = False
 
         if timer:
