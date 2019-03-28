@@ -189,7 +189,8 @@ def init(client):
                     await client.send_message(channel, "No daily song today!")
                 cont = False
 
-            await asyncio.sleep(post_time)
+            if timer:
+                await asyncio.sleep(post_time)
             i += 1
             if i >= cnt:
                 cont = False
