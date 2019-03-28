@@ -4,6 +4,8 @@
 from datetime import datetime
 import re
 import random
+from math import ceil
+
 import discord
 from asynctimer import AsyncTimer
 import db_handler
@@ -129,12 +131,23 @@ def init(client):
     @client.command(pass_context=True)
     async def set_song_channel(context):
         m = context.message
-        if len(m.channel_mentions) > 0:
-            print(m.channel_mentions)
-            db_handler.set_server(m.server.id, m.channel_mentions[0].id)
-            await client.say("Channel {} configured".format(m.channel_mentions[0].mention))
+        if m.author.server_permissions.administrator:
+            if len(m.channel_mentions) > 0:
+                print(m.channel_mentions)
+                db_handler.set_server(m.server.id, m.channel_mentions[0].id)
+                await client.say("Channel {} configured".format(m.channel_mentions[0].mention))
+            else:
+                await client.say("Please provide a channel")
         else:
-            await client.say("Please provide a channel")
+            await client.say("Insufficient permissions")
+
+    @client.command(pass_context=True)
+    async def force_send(context):
+        m = context.message
+        if m.author.server_permissions.administrator:
+            await send_song(False)
+        else:
+            await client.say("Insufficient permissions")
 
     @client.event
     async def on_message(message):
@@ -152,23 +165,23 @@ def init(client):
 
     secs = delta_t.seconds + 1
 
-    async def send_song():
-        song = db_handler.get_song()
-        cnt = db_handler.count_song() / 15
+    async def send_song(timer=True):
+        cnt = ceil(db_handler.count_song() / 15)
+        print(cnt)
         cont = True
         while cont:
+            song = db_handler.get_song()
+            print(song)
             if song is not None:
                 for s, c in db_handler.get_servers():
                     server = client.get_server(id=s)
                     channel = discord.utils.get(server.channels, id=c)
-                    print(channel, server.name)
                     await client.send_message(channel, "Daily song: {}\nSubmitted by: {}\n{}".format(song[0], song[1],
                                                                                                      song[2]).strip())
             else:
                 for s, c in db_handler.get_servers():
                     server = client.get_server(id=s)
                     channel = discord.utils.get(server.channels, id=c)
-                    print(channel, server.name)
                     await client.send_message(channel, "No daily song today!")
                 cont = False
 
@@ -176,6 +189,7 @@ def init(client):
             if cnt == 0:
                 cont = False
 
-        AsyncTimer(86400, send_song)
+        if timer:
+            AsyncTimer(86400, send_song)
 
     AsyncTimer(secs, send_song)

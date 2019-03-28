@@ -42,7 +42,8 @@ def get_song():
     if len(db['songs']) == 0:
         return None
     else:
-        e = db['songs'].pop(random.randint(0, len(db['songs'])))
+        r = random.randint(0, len(db['songs']) - 1)
+        e = db['songs'].pop(r)
         write()
         return e
 
