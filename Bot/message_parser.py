@@ -150,6 +150,11 @@ def init(client):
         else:
             await client.say("Insufficient permissions")
 
+    @client.command(aliases=['hm'], pass_context=True)
+    async def how_many(context):
+        m = context.message
+        await client.say("{} songs in queue.".format(db_handler.count_song()))
+
     @client.event
     async def on_message(message):
         """responding to non command messages"""
