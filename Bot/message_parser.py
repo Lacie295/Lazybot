@@ -2,7 +2,7 @@
 
 # This file contains all functions necessary to reply to messages
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import random
 from math import ceil
@@ -161,7 +161,7 @@ def init(client):
         await client.process_commands(message)
 
     x = datetime.today()
-    y = x.replace(day=x.day + 1, hour=12, minute=0, second=0, microsecond=0)
+    y = (x + timedelta(days=1)).replace(hour=12, minute=0, second=0, microsecond=0)
     delta_t = y - x
 
     secs = delta_t.seconds + 1
@@ -169,7 +169,7 @@ def init(client):
     async def send_song(timer=True):
         if timer:
             AsyncTimer(86400, send_song)
-        
+
         cnt = ceil(db_handler.count_song() / 15)
         post_time = 86400 / cnt
         i = 0
