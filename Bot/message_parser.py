@@ -167,15 +167,15 @@ def init(client):
     secs = delta_t.seconds + 1
 
     async def send_song(timer=True):
-        print("oy")
+        if timer:
+            AsyncTimer(86400, send_song)
+        
         cnt = ceil(db_handler.count_song() / 15)
         post_time = 86400 / cnt
-        print(cnt)
         i = 0
         cont = True
         while cont:
             song = db_handler.get_song()
-            print(song)
             if song is not None:
                 for s, c in db_handler.get_servers():
                     server = client.get_server(id=s)
@@ -194,8 +194,5 @@ def init(client):
             i += 1
             if i >= cnt:
                 cont = False
-
-        if timer:
-            AsyncTimer(86400, send_song)
 
     AsyncTimer(secs, send_song)
