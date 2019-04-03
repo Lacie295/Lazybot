@@ -103,7 +103,7 @@ def init(client):
     @client.command(aliases=['qs'], pass_context=True)
     async def queue_song(context):
         m = context.message
-        if db_handler.count_song(m.author.id) < 20:
+        if db_handler.count_song(m.author.name) < 20:
             pos1 = m.content.find(" ")
             if pos1 > 0:
                 url = m.content.split(" ")[1]

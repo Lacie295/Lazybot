@@ -60,14 +60,17 @@ def set_server(server, channel):
     write()
 
 
-def count_song(user_id = None):
-    if user_id is not None:
+def count_song(user=None):
+    print(user)
+    if user is None:
+        print("yo")
         return len(db['songs'])
     else:
         c = 0
         for s in db['songs']:
-            if s[1] == user_id:
+            if s[1] == user:
                 c += 1
+        print(c)
         return c
 
 
