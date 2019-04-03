@@ -60,8 +60,15 @@ def set_server(server, channel):
     write()
 
 
-def count_song():
-    return len(db['songs'])
+def count_song(user_id = None):
+    if user_id is not None:
+        return len(db['songs'])
+    else:
+        c = 0
+        for s in db['songs']:
+            if s[1] == user_id:
+                c += 1
+        return c
 
 
 def get_servers():

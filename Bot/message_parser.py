@@ -29,7 +29,7 @@ def init(client):
             await client.say("pong {}".format(user.mention))
         else:
             await client.say("pong")
-        await client.send_message(context.message.author, "pong, but in private")
+        await client.send_message(context.message.author, "pong, but in private.")
 
     @client.command(pass_context=True)
     async def ban(context):
@@ -47,17 +47,17 @@ def init(client):
         if m.author.server_permissions.ban_members:
             for member in m.mentions:
                 await client.ban(member, delete_message_days=0)
-                await client.say("banned {} for {} days (-1 = indefinite)".format(member.name, unban_time))
+                await client.say("Banned {} for {} days (-1 = indefinite).".format(member.name, unban_time))
 
             if unban_time >= 0:
                 async def unban_all():
                     for member in m.mentions:
                         await client.unban(m.server, member)
-                        await client.send_message(m.channel, "unbanned {}".format(member.name))
+                        await client.send_message(m.channel, "unbanned {}.".format(member.name))
 
                 AsyncTimer(unban_time * 86400, unban_all)
         else:
-            await client.say("you do not have the permission to ban users")
+            await client.say("You do not have the permission to ban users")
 
     @client.command(pass_context=True)
     async def kick(context):
@@ -66,9 +66,9 @@ def init(client):
         if m.author.server_permissions.kick_members:
             for member in m.mentions:
                 await client.kick(member)
-                await client.say("kicked {}".format(member.name))
+                await client.say("Kicked {}.".format(member.name))
         else:
-            await client.say("you do not have the permission to kick users")
+            await client.say("You do not have the permission to kick users.")
 
     @client.command(aliases=['mute', 'silence'], pass_context=True)
     async def timeout(context):
@@ -87,47 +87,50 @@ def init(client):
         if m.author.server_permissions.manage_roles and mute_time >= 0:
             for member in m.mentions:
                 await client.add_roles(member, muted)
-                await client.say("Muted {} for {} minutes".format(member.name, int(mute_time)))
+                await client.say("Muted {} for {} minutes.".format(member.name, int(mute_time)))
             if mute_time >= 0:
                 async def unban_all():
                     for member in m.mentions:
                         await client.remove_roles(member, muted)
-                        await client.send_message(m.channel, "Unmuted {}".format(member.name))
+                        await client.send_message(m.channel, "Unmuted {}.".format(member.name))
 
                 AsyncTimer(mute_time * 60, unban_all)
         elif mute_time == -1:
-            await client.say("Please provide a time (in minutes)")
+            await client.say("Please provide a time (in minutes).")
         else:
-            await client.say("you do not have the permission to ban users")
+            await client.say("You do not have the permission to ban users.")
 
     @client.command(aliases=['qs'], pass_context=True)
     async def queue_song(context):
         m = context.message
-        pos1 = m.content.find(" ")
-        if pos1 > 0:
-            url = m.content.split(" ")[1]
-            regex = re.compile(
-                r'^(?:http|ftp)s?://'  # http:// or https://
-                r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-                r'localhost|'  # localhost...
-                r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-                r'(?::\d+)?'  # optional port
-                r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-            if re.match(regex, url) is not None:
-                comment = ""
-                pos2 = m.content[pos1:].strip().find(" ")
-                if pos2 > 0:
-                    comment = m.content[pos2 + pos1 + 2:].strip()
+        if db_handler.count_song(m.author.id) < 20:
+            pos1 = m.content.find(" ")
+            if pos1 > 0:
+                url = m.content.split(" ")[1]
+                regex = re.compile(
+                    r'^(?:http|ftp)s?://'  # http:// or https://
+                    r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+                    r'localhost|'  # localhost...
+                    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+                    r'(?::\d+)?'  # optional port
+                    r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+                if re.match(regex, url) is not None:
+                    comment = ""
+                    pos2 = m.content[pos1:].strip().find(" ")
+                    if pos2 > 0:
+                        comment = m.content[pos2 + pos1 + 2:].strip()
 
-                if not db_handler.has_song(url):
-                    db_handler.add_song_to_queue(url, m.author.name, comment)
-                    await client.say("Added!")
+                    if not db_handler.has_song(url):
+                        db_handler.add_song_to_queue(url, m.author.name, comment)
+                        await client.say("Added!")
+                    else:
+                        await client.say("This song is already submitted!")
                 else:
-                    await client.say("This song is already submitted!")
+                    await client.say("Please provide a valid URL.")
             else:
-                await client.say("Please provide a valid URL")
+                await client.say("Please give at least an URL.")
         else:
-            await client.say("Please give at least an URL")
+            await client.say("You have exceeded the song cap.")
 
     @client.command(pass_context=True)
     async def set_song_channel(context):
@@ -136,11 +139,11 @@ def init(client):
             if len(m.channel_mentions) > 0:
                 print(m.channel_mentions)
                 db_handler.set_server(m.server.id, m.channel_mentions[0].id)
-                await client.say("Channel {} configured".format(m.channel_mentions[0].mention))
+                await client.say("Channel {} configured.".format(m.channel_mentions[0].mention))
             else:
-                await client.say("Please provide a channel")
+                await client.say("Please provide a channel.")
         else:
-            await client.say("Insufficient permissions")
+            await client.say("Insufficient permissions.")
 
     @client.command(pass_context=True)
     async def force_send(context):
@@ -148,7 +151,7 @@ def init(client):
         if m.author.server_permissions.administrator:
             await send_song(False)
         else:
-            await client.say("Insufficient permissions")
+            await client.say("Insufficient permissions.")
 
     @client.command(aliases=['hm'], pass_context=True)
     async def how_many(context):
