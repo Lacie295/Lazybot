@@ -168,15 +168,18 @@ def init(client):
 
         await client.process_commands(message)
 
-    x = datetime.today()
-    y = (x + timedelta(days=1)).replace(hour=12, minute=0, second=0, microsecond=0)
-    delta_t = y - x
 
-    secs = delta_t.seconds + 1
+    def secs():
+        x = datetime.today()
+        x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
+        y = x_temp if x_temp > x else x_temp + timedelta(days=1)
+        delta_t = y - x
+
+        return delta_t.seconds + 1
 
     async def send_song(timer=True):
         if timer:
-            AsyncTimer(86400, send_song)
+            AsyncTimer(secs(), send_song)
 
         cnt = ceil(db_handler.count_song() / 15)
         post_time = 86400 / cnt
@@ -203,4 +206,4 @@ def init(client):
             if i >= cnt:
                 cont = False
 
-    AsyncTimer(secs, send_song)
+    AsyncTimer(secs(), send_song)
