@@ -153,7 +153,7 @@ def init(client):
         else:
             await client.say("Insufficient permissions.")
 
-    @client.command(aliases=['hm'], pass_context=True)
+    @client.command(aliases=['hm', 'hmmmmmmmm'], pass_context=True)
     async def how_many(context):
         m = context.message
         await client.say("{} songs in queue.".format(db_handler.count_song()))
@@ -167,7 +167,6 @@ def init(client):
                                           client.messages[random.choice(range(len(client.messages)))].content)
 
         await client.process_commands(message)
-
 
     def secs():
         x = datetime.today()
