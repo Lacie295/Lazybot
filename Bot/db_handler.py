@@ -6,6 +6,8 @@ import json
 import os
 import random
 
+import numpy
+
 songs = '../songlist.json'
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, songs)
@@ -33,6 +35,12 @@ def write():
         file.close()
 
 
+for i in range(len(db['songs'])):
+    if len(db['songs'][i]) == 3:
+        db['songs'][i].append(1)
+write()
+
+
 def add_song_to_queue(url, author, comment):
     db['songs'].append((url, author, comment))
     write()
@@ -42,8 +50,13 @@ def get_song():
     if len(db['songs']) == 0:
         return None
     else:
-        r = random.randint(0, len(db['songs']) - 1)
+        prob = [s[3] for s in db['songs']]
+        total = sum(prob)
+        prob = [p / total for p in prob]
+        r = numpy.random.choice(len(db['songs']), replace=False, p=prob)
         e = db['songs'].pop(r)
+        for i in range(len(db['songs'])):
+            db['songs'][i][3] += 1
         write()
         return e
 
@@ -61,9 +74,7 @@ def set_server(server, channel):
 
 
 def count_song(user=None):
-    print(user)
     if user is None:
-        print("yo")
         return len(db['songs'])
     else:
         c = 0
