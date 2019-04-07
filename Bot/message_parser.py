@@ -5,7 +5,7 @@ import asyncio
 from datetime import datetime, timedelta
 import re
 import random
-from math import ceil
+from math import ceil, floor
 
 import discord
 from asynctimer import AsyncTimer
@@ -182,6 +182,7 @@ def init(client):
 
         cnt = ceil(db_handler.count_song() / 15)
         post_time = 86400 / cnt
+        cnt = floor(secs() / post_time)
         i = 0
         cont = True
         while cont:
@@ -205,4 +206,13 @@ def init(client):
             if i >= cnt:
                 cont = False
 
-    AsyncTimer(secs(), send_song)
+    cnt = ceil(db_handler.count_song() / 15)
+    print(cnt)
+    post_time = 86400 / cnt
+    cnt = floor(secs() / post_time)
+
+    AsyncTimer(secs() - cnt * post_time, send_song)
+    print(secs())
+    print(cnt)
+    print(post_time)
+    print(secs() - cnt * post_time)

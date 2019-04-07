@@ -42,7 +42,7 @@ write()
 
 
 def add_song_to_queue(url, author, comment):
-    db['songs'].append((url, author, comment))
+    db['songs'].append((url, author, comment, 1))
     write()
 
 
@@ -62,7 +62,7 @@ def get_song():
 
 
 def has_song(url):
-    for u, _, _ in db['songs']:
+    for u, _, _, _ in db['songs']:
         if u == url:
             return True
     return False
