@@ -153,9 +153,8 @@ def init(client):
         else:
             await client.say("Insufficient permissions.")
 
-    @client.command(aliases=['hm', 'hmmmmmmmm'], pass_context=True)
-    async def how_many(context):
-        m = context.message
+    @client.command(aliases=['hm', 'hmmmmmmmm'], pass_context=False)
+    async def how_many():
         await client.say("{} songs in queue.".format(db_handler.count_song()))
 
     @client.event
@@ -174,15 +173,19 @@ def init(client):
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
 
-        return delta_t.seconds + 1
-
-    async def send_song(timer=True):
-        if timer:
-            AsyncTimer(secs(), send_song)
-
+        sec = delta_t.seconds + 1
         cnt = ceil(db_handler.count_song() / 15)
         post_time = 86400 / cnt
-        cnt = floor(secs() / post_time)
+        cnt = floor(sec / post_time)
+        time_left = sec - cnt * post_time
+
+        return sec, cnt, post_time, time_left
+
+    async def send_song(timer=True):
+        sec, cnt, post_time, _ = secs()
+        if timer:
+            AsyncTimer(sec, send_song)
+
         i = 0
         cont = True
         while cont:
@@ -206,13 +209,4 @@ def init(client):
             if i >= cnt:
                 cont = False
 
-    cnt = ceil(db_handler.count_song() / 15)
-    print(cnt)
-    post_time = 86400 / cnt
-    cnt = floor(secs() / post_time)
-
-    AsyncTimer(secs() - cnt * post_time, send_song)
-    print(secs())
-    print(cnt)
-    print(post_time)
-    print(secs() - cnt * post_time)
+    AsyncTimer(secs()[3], send_song)
