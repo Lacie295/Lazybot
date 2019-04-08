@@ -185,7 +185,7 @@ def init(client):
         sec, cnt, post_time, _ = secs()
         if timer:
             AsyncTimer(sec, send_song)
-            
+
         print(secs())
 
         i = 0
@@ -211,4 +211,5 @@ def init(client):
             if i >= cnt:
                 cont = False
 
+    print(secs())
     AsyncTimer(secs()[3], send_song)
