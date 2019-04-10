@@ -212,4 +212,4 @@ def init(client):
                 cont = False
 
     print(secs())
-    AsyncTimer(secs()[3], send_song)
+    AsyncTimer(secs()[2], send_song)
