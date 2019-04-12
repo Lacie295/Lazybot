@@ -4,6 +4,8 @@
 import asyncio
 import re
 import random
+import time
+
 import discord
 import logger
 
@@ -174,7 +176,7 @@ def init(client):
         x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
-        logger.debug("now: {}, post time: {}".format(x, y))
+        logger.info("now: {}, post time: {}".format(x, y))
 
         sec = delta_t.seconds + 1
         cnt1 = ceil(db_handler.count_song() / 15)
@@ -190,7 +192,7 @@ def init(client):
         if timer:
             AsyncTimer(time_left, sec)
 
-        logger.debug("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
+        logger.info("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
 
         i = 0
         cont = True
@@ -217,9 +219,10 @@ def init(client):
 
     AsyncTimer(secs()[2], send_song)
 
-    async def log_time():
+    def log_time():
         cnt, post_time, time_left, sec = secs()
-        logger.debug("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
-        AsyncTimer(300, log_time)
+        logger.info("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
+        time.sleep(300)
+        log_time()
 
-    AsyncTimer(1, log_time())
+    log_time()
