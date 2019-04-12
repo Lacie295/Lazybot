@@ -54,7 +54,8 @@ def get_song():
         r = numpy.random.choice(len(db['songs']), replace=False, p=prob)
         e = db['songs'].pop(r)
         for i in range(len(db['songs'])):
-            db['songs'][i][3] += 1
+            if db['songs'][i][3] < 500:
+                db['songs'][i][3] += 1
         write()
         return e
 
