@@ -174,17 +174,18 @@ def init(client):
         delta_t = y - x
 
         sec = delta_t.seconds + 1
-        cnt = ceil(db_handler.count_song() / 15)
-        post_time = 86400 / cnt
+        cnt1 = ceil(db_handler.count_song() / 15)
+        post_time = 86400 / cnt1
         cnt = floor(sec / post_time)
+        cnt = cnt if cnt != 0 else cnt1
         time_left = sec - cnt * post_time
 
-        return sec, cnt, post_time, time_left
+        return cnt, post_time, time_left, sec
 
     async def send_song(timer=True):
-        sec, cnt, post_time, _ = secs()
+        cnt, post_time, time_left, sec = secs()
         if timer:
-            AsyncTimer(sec, send_song)
+            AsyncTimer(time_left, sec)
 
         print(secs())
 
@@ -212,4 +213,4 @@ def init(client):
                 cont = False
 
     print(secs())
-    AsyncTimer(secs()[2], send_song)
+    AsyncTimer(secs()[1], send_song)
