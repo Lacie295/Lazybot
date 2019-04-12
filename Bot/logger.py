@@ -4,7 +4,7 @@ import os
 songs = 'Lazybot.log'
 dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, songs)
-logging.basicConfig(filename=filename,level=logging.DEBUG)
+logging.basicConfig(filename=filename, filemode='w', level=logging.DEBUG)
 
 
 def debug(msg):
