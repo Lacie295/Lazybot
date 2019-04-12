@@ -194,7 +194,7 @@ def init(client):
     async def send_song(timer=True):
         cnt, post_time, time_left, sec = secs()
         if timer:
-            AsyncTimer(time_left, sec)
+            AsyncTimer(sec, send_song)
 
         logger.info("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
 
