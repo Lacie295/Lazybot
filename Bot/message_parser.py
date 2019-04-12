@@ -4,6 +4,7 @@
 import asyncio
 import re
 import random
+import threading
 import time
 
 import discord
@@ -219,12 +220,11 @@ def init(client):
 
     AsyncTimer(secs()[2], send_song)
 
-    async def log_time():
+    def log_time():
         cnt, post_time, time_left, sec = secs()
         logger.info("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
-        await asyncio.sleep(300)
-        await log_time()
+        time.sleep(300)
+        log_time()
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(log_time())
-    loop.close()
+    thread = threading.Thread(target=log_time)
+    thread.start()
