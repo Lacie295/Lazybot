@@ -4,8 +4,6 @@
 
 import json
 import os
-import random
-
 import numpy
 
 songs = '../songlist.json'

@@ -2,16 +2,18 @@
 
 # This file contains all functions necessary to reply to messages
 import asyncio
-from datetime import datetime, timedelta
 import re
 import random
-from math import ceil, floor
-
 import discord
+import logger
+
+from math import ceil, floor
+from datetime import datetime, timedelta
+
 from asynctimer import AsyncTimer
+from utils import elem_in_string
 import db_handler
 
-from utils import elem_in_string
 
 commands = ['yo bot', 'yea bot', 'yea boi']
 
@@ -172,6 +174,7 @@ def init(client):
         x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
+        logger.debug("now: {}, post time: {}".format(x, y))
 
         sec = delta_t.seconds + 1
         cnt1 = ceil(db_handler.count_song() / 15)
@@ -187,7 +190,7 @@ def init(client):
         if timer:
             AsyncTimer(time_left, sec)
 
-        print(secs())
+        logger.debug("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
 
         i = 0
         cont = True
@@ -212,5 +215,6 @@ def init(client):
             if i >= cnt:
                 cont = False
 
-    print(secs())
-    AsyncTimer(secs()[1], send_song)
+    c, p, t, s = secs()
+    logger.debug("First: count: {}, post time: {}, time_left: {}, sec: {}".format(c, p, t, s))
+    AsyncTimer(p, send_song)
