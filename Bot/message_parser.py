@@ -215,6 +215,11 @@ def init(client):
             if i >= cnt:
                 cont = False
 
-    c, p, t, s = secs()
-    logger.debug("First: count: {}, post time: {}, time_left: {}, sec: {}".format(c, p, t, s))
-    AsyncTimer(p, send_song)
+    AsyncTimer(secs()[2], send_song)
+
+    async def log_time():
+        cnt, post_time, time_left, sec = secs()
+        logger.debug("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
+        AsyncTimer(300, log_time)
+
+    AsyncTimer(1, log_time())
