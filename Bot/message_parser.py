@@ -111,18 +111,18 @@ def init(client):
     @client.command(aliases=['qs'], pass_context=True)
     async def queue_song(context):
         m = context.message
-        if db_handler.count_song(m.author.name) < 20:
-            pos1 = m.content.find(" ")
-            if pos1 > 0:
-                url = m.content.split(" ")[1]
-                regex = re.compile(
-                    r'^(?:http|ftp)s?://'  # http:// or https://
-                    r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-                    r'localhost|'  # localhost...
-                    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-                    r'(?::\d+)?'  # optional port
-                    r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-                if re.match(regex, url) is not None:
+        pos1 = m.content.find(" ")
+        if pos1 > 0:
+            url = m.content.split(" ")[1]
+            regex = re.compile(
+                r'^(?:http|ftp)s?://'  # http:// or https://
+                r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+                r'localhost|'  # localhost...
+                r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+                r'(?::\d+)?'  # optional port
+                r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+            if re.match(regex, url) is not None:
+                if db_handler.count_song(m.author.name) < 20:
                     comment = ""
                     pos2 = m.content[pos1:].strip().find(" ")
                     if pos2 > 0:
@@ -134,11 +134,11 @@ def init(client):
                     else:
                         await client.say("This song is already submitted!")
                 else:
-                    await client.say("Please provide a valid URL.")
+                    await client.say("You have exceeded the song cap.")
             else:
-                await client.say("Please give at least an URL.")
+                await client.say("Please provide a valid URL.")
         else:
-            await client.say("You have exceeded the song cap.")
+            await client.say("Please give at least an URL.")
 
     @client.command(pass_context=True)
     async def set_song_channel(context):
