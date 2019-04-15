@@ -186,8 +186,8 @@ def init(client):
         cnt1 = ceil(db_handler.count_song() / 15)
         post_time = round(86400 / cnt1)
         cnt = floor(sec / post_time)
-        cnt = cnt if cnt != 0 else cnt1
         time_left = sec - cnt * post_time
+        cnt = cnt if cnt != 0 else cnt1
 
         return cnt, post_time, time_left, sec
 
