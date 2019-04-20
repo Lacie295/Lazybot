@@ -194,6 +194,7 @@ def init(client):
     async def send_song(timer=True):
         cnt, post_time, time_left, sec = secs()
         if timer:
+            logger.info("Launching timer")
             AsyncTimer(sec, send_song)
 
         logger.info("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
@@ -223,11 +224,11 @@ def init(client):
 
     AsyncTimer(secs()[2], send_song)
 
-    def log_time():
+    """def log_time():
         cnt, post_time, time_left, sec = secs()
         logger.info("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
         time.sleep(300)
         log_time()
 
     thread = threading.Thread(target=log_time)
-    thread.start()
+    thread.start()"""
