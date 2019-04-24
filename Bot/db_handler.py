@@ -84,5 +84,13 @@ def count_song(user=None):
         return c
 
 
+def list_songs(user):
+    songs = ""
+    for s in db['songs']:
+        if s[1] == user:
+            songs += "<" + s[0] + ">\n"
+    return songs.strip()
+
+
 def get_servers():
     return db['channels']

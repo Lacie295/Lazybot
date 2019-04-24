@@ -161,9 +161,18 @@ def init(client):
         else:
             await client.say("Insufficient permissions.")
 
-    @client.command(aliases=['hm', 'hmmmmmmmm'], pass_context=False)
-    async def how_many():
-        await client.say("{} songs in queue.".format(db_handler.count_song()))
+    @client.command(aliases=['hm', 'hmmmmmmmm'], pass_context=True)
+    async def how_many(context):
+        m = context.message
+        if len(m.mentions) == 0:
+            await client.say("{} songs in queue.".format(db_handler.count_song()))
+        else:
+            for member in m.mentions:
+                await client.say("{} has {} songs in queue.".format(member.name, db_handler.count_song(member.name)))
+
+    @client.command(aliases=['ls'], pass_context=True)
+    async def list_songs(context):
+        await client.say(db_handler.list_songs(context.message.author.name))
 
     @client.event
     async def on_message(message):
