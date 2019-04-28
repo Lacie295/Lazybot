@@ -186,14 +186,14 @@ def init(client):
 
     def secs():
         x = datetime.today()
-        x_temp = x.replace(hour=14, minute=33, second=0, microsecond=0)
+        x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
         logger.info("now: {}, post time: {}".format(x, y))
 
         sec = delta_t.seconds + 1
         cnt1 = ceil(db_handler.count_song() / 15)
-        post_time = round(100 / cnt1)
+        post_time = round(86400 / cnt1)
         cnt = floor(sec / post_time)
         time_left = sec - cnt * post_time
         cnt = cnt1 if cnt == 0 else cnt
