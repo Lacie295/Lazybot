@@ -186,32 +186,31 @@ def init(client):
 
     def secs():
         x = datetime.today()
-        x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
+        x_temp = x.replace(hour=14, minute=33, second=0, microsecond=0)
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
         logger.info("now: {}, post time: {}".format(x, y))
 
         sec = delta_t.seconds + 1
         cnt1 = ceil(db_handler.count_song() / 15)
-        post_time = round(86400 / cnt1)
+        post_time = round(100 / cnt1)
         cnt = floor(sec / post_time)
         time_left = sec - cnt * post_time
-        cnt = cnt if cnt != 0 else cnt1
+        cnt = cnt1 if cnt == 0 else cnt
 
         return cnt, post_time, time_left, sec
 
     async def send_song(timer=True):
         cnt, post_time, time_left, sec = secs()
-        if timer:
-            logger.info("Launching timer")
-            AsyncTimer(sec, send_song)
 
         logger.info("sending: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
 
+        await asyncio.sleep(time_left)
         i = 0
         cont = True
         while cont:
             song = db_handler.get_song()
+            logger.info("sending....")
             if song is not None:
                 for s, c in db_handler.get_servers():
                     server = client.get_server(id=s)
@@ -225,13 +224,18 @@ def init(client):
                     await client.send_message(channel, "No daily song today!")
                 cont = False
 
-            if timer:
-                await asyncio.sleep(post_time)
             i += 1
             if i >= cnt:
                 cont = False
 
-    AsyncTimer(secs()[2], send_song)
+            if timer and cont:
+                await asyncio.sleep(post_time)
+
+        if timer:
+            logger.info("Launching timer")
+            AsyncTimer(secs()[3], send_song)
+
+    AsyncTimer(0, send_song)
 
     def log_time():
         cnt, post_time, time_left, sec = secs()

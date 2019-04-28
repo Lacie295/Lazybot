@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import os
 
@@ -9,14 +10,14 @@ logging.basicConfig(filename=filename, filemode='w', level=logging.INFO)
 
 def debug(msg):
     logging.debug(msg)
-    print("DEBUG: {}".format(msg))
+    print("DEBUG: {} - {}".format(datetime.today(), msg))
 
 
 def info(msg):
     logging.info(msg)
-    print("INFO: {}".format(msg))
+    print("INFO: {} - {}".format(datetime.today(), msg))
 
 
 def warning(msg):
     logging.warning(msg)
-    print("WARN: {}".format(msg))
+    print("WARN: {} - {}".format(datetime.today(), msg))
