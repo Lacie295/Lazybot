@@ -15,6 +15,7 @@ def debug(msg):
 
 def info(msg):
     logging.info(msg)
+
     print("INFO: {} - {}".format(datetime.today(), msg))
 
 

@@ -2,23 +2,22 @@
 
 # This file contains all functions necessary to reply to messages
 import asyncio
-import re
 import random
-import threading
-import time
+import re
+from datetime import datetime, timedelta
+from math import ceil, floor
 
 import discord
+import logging
+
+import db_handler
 import logger
-
-from math import ceil, floor
-from datetime import datetime, timedelta
-
 from asynctimer import AsyncTimer
 from utils import elem_in_string
-import db_handler
-
 
 commands = ['yo bot', 'yea bot', 'yea boi']
+
+day_length = 10  # 24*60*60
 
 
 def init(client):
@@ -189,59 +188,32 @@ def init(client):
         x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
-        logger.info("now: {}, post time: {}".format(x, y))
 
-        sec = delta_t.seconds + 1
-        cnt1 = ceil(db_handler.count_song() / 15)
-        post_time = round(86400 / cnt1)
-        cnt = floor(sec / post_time)
-        time_left = sec - cnt * post_time
-        cnt = cnt1 if cnt == 0 else cnt
+        cnt = ceil(db_handler.count_song() / 15)
+        interval = day_length / cnt
+        cnt = ceil(delta_t.seconds / interval)
+        next_song = delta_t.seconds - (cnt - 1) * interval
 
-        return cnt, post_time, time_left, sec
+        return delta_t.seconds + 1, cnt, interval, next_song
 
     async def send_song(timer=True):
-        cnt, post_time, time_left, sec = secs()
-
-        logger.info("sending: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
-
-        await asyncio.sleep(time_left)
-        i = 0
-        cont = True
-        while cont:
-            song = db_handler.get_song()
-            logger.info("sending....")
-            if song is not None:
-                for s, c in db_handler.get_servers():
-                    server = client.get_server(id=s)
-                    channel = discord.utils.get(server.channels, id=c)
-                    await client.send_message(channel, "Daily song: {}\nSubmitted by: {}\n{}".format(song[0], song[1],
-                                                                                                     song[2]).strip())
-            else:
-                for s, c in db_handler.get_servers():
-                    server = client.get_server(id=s)
-                    channel = discord.utils.get(server.channels, id=c)
-                    await client.send_message(channel, "No daily song today!")
-                cont = False
-
-            i += 1
-            if i >= cnt:
-                cont = False
-
-            if timer and cont:
-                await asyncio.sleep(post_time)
+        s, c, i, n = secs()
+        print(secs())
 
         if timer:
-            logger.info("Launching timer")
-            AsyncTimer(secs()[3], send_song)
+            AsyncTimer(s, send_song)
+            await asyncio.sleep(n)
+        for _ in range(c):
+            print(secs())
+            song = db_handler.get_song()
+            if song is None:
+                logger.info("not sending song")
+                await db_handler.send_all(client, "No daily song today. :(")
+                break
+            url, author, comment, _ = song
+            logger.info("sending song")
+            await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author, comment))
+            if timer:
+                await asyncio.sleep(i)
 
     AsyncTimer(0, send_song)
-
-    def log_time():
-        cnt, post_time, time_left, sec = secs()
-        logger.info("restart: count: {}, post time: {}, time_left: {}, sec: {}".format(cnt, post_time, time_left, sec))
-        time.sleep(300)
-        log_time()
-
-    thread = threading.Thread(target=log_time)
-    thread.start()

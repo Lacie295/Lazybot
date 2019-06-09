@@ -4,6 +4,8 @@
 
 import json
 import os
+
+import discord
 import numpy
 
 songs = '../songlist.json'
@@ -94,3 +96,10 @@ def list_songs(user):
 
 def get_servers():
     return db['channels']
+
+
+async def send_all(client, msg):
+    for s, ch in get_servers():
+        server = client.get_server(id=s)
+        channel = discord.utils.get(server.channels, id=ch)
+        await client.send_message(channel, msg)
