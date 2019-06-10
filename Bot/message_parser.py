@@ -17,7 +17,7 @@ from utils import elem_in_string
 
 commands = ['yo bot', 'yea bot', 'yea boi']
 
-day_length = 10  # 24*60*60
+day_length = 24*60*60
 
 
 def init(client):
