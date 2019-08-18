@@ -69,8 +69,8 @@ def has_song(url):
     return False
 
 
-def set_server(server, channel):
-    db['channels'].append((server, channel))
+def set_channel(channel):
+    db['channels'].append(channel)
     write()
 
 
@@ -95,11 +95,11 @@ def list_songs(user):
 
 
 def get_servers():
+    print(db['channels'])
     return db['channels']
 
 
 async def send_all(client, msg):
-    for s, ch in get_servers():
-        server = client.get_server(id=s)
-        channel = discord.utils.get(server.channels, id=ch)
-        await client.send_message(channel, msg)
+    for ch in get_servers():
+        channel = client.get_channel(ch)
+        await channel.send(msg)

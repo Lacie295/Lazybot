@@ -107,3 +107,4 @@ venv.bak/
 config.json
 Bot/config.json
 songlist.json
+.idea

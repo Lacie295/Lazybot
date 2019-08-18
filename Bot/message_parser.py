@@ -21,19 +21,17 @@ day_length = 24*60*60
 
 
 def init(client):
-    client = client
-
     @client.command(aliases=['hey', 'hi', 'hello'], pass_context=True)
     async def ping(context):
         """Responds with "pong" + a mention to the first username in the arguments if present. Also sends a pm to the
         user using the command."""
         m = context.message
         if m.content.find(" ") > 0:
-            user = m.server.get_member_named(m.content.split(" ")[1])
-            await client.say("pong {}".format(user.mention))
+            user = m.guild.get_member_named(m.content.split(" ")[1])
+            await context.send("pong {}".format(user.mention))
         else:
-            await client.say("pong")
-        await client.send_message(context.message.author, "pong, but in private.")
+            await context.send("pong")
+        await context.message.author.send("pong, but in private.")
 
     @client.command(pass_context=True)
     async def ban(context):
@@ -41,7 +39,7 @@ def init(client):
         unbans them after given time in days."""
         m = context.message
 
-        if m.author.server_permissions.ban_members:
+        if m.author.guild_permissions.ban_members:
             if m.content.find(" ") > 0:
                 try:
                     unban_time = float(m.content.split(" ")[-1])
@@ -51,29 +49,29 @@ def init(client):
                 unban_time = -1
 
             for member in m.mentions:
-                await client.ban(member, delete_message_days=0)
-                await client.say("Banned {} for {} days (-1 = indefinite).".format(member.name, unban_time))
+                await member.ban(delete_message_days=0)
+                await context.send("Banned {} for {} days (-1 = indefinite).".format(member.name, unban_time))
 
             if unban_time >= 0:
                 async def unban_all():
                     for member in m.mentions:
-                        await client.unban(m.server, member)
-                        await client.send_message(m.channel, "unbanned {}.".format(member.name))
+                        await m.guild.unban(member)
+                        await context.send("unbanned {}.".format(member.name))
 
                 AsyncTimer(unban_time * 86400, unban_all)
         else:
-            await client.say("You do not have the permission to ban users")
+            await context.send("You do not have the permission to ban users")
 
     @client.command(pass_context=True)
     async def kick(context):
         """Takes a list of mentioned users and kicks them all."""
         m = context.message
-        if m.author.server_permissions.kick_members:
+        if m.author.guild_permissions.kick_members:
             for member in m.mentions:
-                await client.kick(member)
-                await client.say("Kicked {}.".format(member.name))
+                await member.kick()
+                await context.send("Kicked {}.".format(member.name))
         else:
-            await client.say("You do not have the permission to kick users.")
+            await context.send("You do not have the permission to kick users.")
 
     @client.command(aliases=['mute', 'silence'], pass_context=True)
     async def timeout(context):
@@ -81,8 +79,8 @@ def init(client):
         specified time in minutes."""
         m = context.message
 
-        if m.author.server_permissions.manage_roles:
-            muted = discord.utils.get(m.server.roles, name='Muted')
+        if m.author.guild_permissions.manage_roles:
+            muted = discord.utils.get(m.guild.roles, name='Muted')
             if m.content.find(" ") > 0:
                 try:
                     mute_time = float(m.content.split(" ")[-1])
@@ -93,19 +91,19 @@ def init(client):
 
             if mute_time > 0:
                 for member in m.mentions:
-                    await client.add_roles(member, muted)
-                    await client.say("Muted {} for {} minutes.".format(member.name, int(mute_time)))
+                    await member.add_roles(muted)
+                    await context.send("Muted {} for {} minutes.".format(member.name, int(mute_time)))
 
                 async def unmute_all():
                     for member in m.mentions:
-                        await client.remove_roles(member, muted)
-                        await client.send_message(m.channel, "Unmuted {}.".format(member.name))
+                        await member.remove_roles(muted)
+                        await context.send("Unmuted {}.".format(member.name))
 
                 AsyncTimer(mute_time * 60, unmute_all)
             else:
-                await client.say("Please provide a time (in minutes).")
+                await context.send("Please provide a time (in minutes).")
         else:
-            await client.say("You do not have the permission to ban users.")
+            await context.send("You do not have the permission to ban users.")
 
     @client.command(aliases=['qs'], pass_context=True)
     async def queue_song(context):
@@ -129,57 +127,56 @@ def init(client):
                             comment = m.content[pos2 + pos1 + 2:].strip()
 
                         db_handler.add_song_to_queue(url, m.author.name, comment)
-                        await client.say("Added!")
+                        await context.send("Added!")
                     else:
-                        await client.say("You have exceeded the song cap.")
+                        await context.send("You have exceeded the song cap.")
                 else:
-                    await client.say("This song is already submitted!")
+                    await context.send("This song is already submitted!")
             else:
-                await client.say("Please provide a valid URL.")
+                await context.send("Please provide a valid URL.")
         else:
-            await client.say("Please give at least an URL.")
+            await context.send("Please give at least an URL.")
 
     @client.command(pass_context=True)
     async def set_song_channel(context):
         m = context.message
-        if m.author.server_permissions.administrator:
+        if m.author.guild_permissions.administrator:
             if len(m.channel_mentions) > 0:
                 print(m.channel_mentions)
-                db_handler.set_server(m.server.id, m.channel_mentions[0].id)
-                await client.say("Channel {} configured.".format(m.channel_mentions[0].mention))
+                db_handler.set_channel(m.channel_mentions[0].id)
+                await context.send("Channel {} configured.".format(m.channel_mentions[0].mention))
             else:
-                await client.say("Please provide a channel.")
+                await context.send("Please provide a channel.")
         else:
-            await client.say("Insufficient permissions.")
+            await context.send("Insufficient permissions.")
 
     @client.command(pass_context=True)
     async def force_send(context):
         m = context.message
-        if m.author.server_permissions.administrator:
+        if m.author.guild_permissions.administrator:
             await send_song(False)
         else:
-            await client.say("Insufficient permissions.")
+            await context.send("Insufficient permissions.")
 
     @client.command(aliases=['hm', 'hmmmmmmmm'], pass_context=True)
     async def how_many(context):
         m = context.message
         if len(m.mentions) == 0:
-            await client.say("{} songs in queue.".format(db_handler.count_song()))
+            await context.send("{} songs in queue.".format(db_handler.count_song()))
         else:
             for member in m.mentions:
-                await client.say("{} has {} songs in queue.".format(member.name, db_handler.count_song(member.name)))
+                await context.send("{} has {} songs in queue.".format(member.name, db_handler.count_song(member.name)))
 
     @client.command(aliases=['ls'], pass_context=True)
     async def list_songs(context):
-        await client.say(db_handler.list_songs(context.message.author.name))
+        await context.send(db_handler.list_songs(context.message.author.name))
 
     @client.event
     async def on_message(message):
         """responding to non command messages"""
         if message.author != client.user:
             if message.channel.name == "bots" and elem_in_string(commands, message.content):
-                await client.send_message(message.channel,
-                                          client.messages[random.choice(range(len(client.messages)))].content)
+                await message.channel.send(random.choice(client.cached_messages).content)
 
         await client.process_commands(message)
 
