@@ -171,14 +171,13 @@ def init(client):
     async def list_songs(context):
         await context.send(db_handler.list_songs(context.message.author.name))
 
-    @client.event
-    async def on_message(message):
-        """responding to non command messages"""
-        if message.author != client.user:
-            if message.channel.name == "bots" and elem_in_string(commands, message.content):
-                await message.channel.send(random.choice(client.cached_messages).content)
-
-        await client.process_commands(message)
+    # @client.event
+    # async def on_message(message):
+    #    """responding to non command messages"""
+    #    if message.author != client.user:
+    #        if message.channel.name == "bots" and elem_in_string(commands, message.content):
+    #            await message.channel.send(random.choice(client.cached_messages).content)
+    #    await client.process_commands(message)
 
     def secs():
         x = datetime.today()
