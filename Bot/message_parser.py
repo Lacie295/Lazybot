@@ -15,6 +15,8 @@ day_length = 24*60*60
 
 
 def init(client):
+    count = [db_handler.count_song()]
+
     @client.command(aliases=['hey', 'hi', 'hello'], pass_context=True)
     async def ping(context):
         """Responds with "pong" + a mention to the first username in the arguments if present. Also sends a pm to the
@@ -171,13 +173,15 @@ def init(client):
 
     def secs():
         x = datetime.today()
-        x_temp = x.replace(hour=12, minute=00, second=0, microsecond=0)
+        x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
 
         return delta_t.seconds + 1
 
     async def send_song():
+        if secs() > 24 * 60 * 60 - 300:
+            count[0] = db_handler.count_song()
         song = db_handler.get_song()
         if song is None:
             await db_handler.send_all(client, "No daily song today.")
@@ -186,9 +190,9 @@ def init(client):
             await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author, comment))
 
     def start_song_timer():
-        count = db_handler.count_song() // 15 + 1
+        c = count[0] // 15 + 1
         s = secs()
-        s = s % (24 * 60 * 60 // count)
+        s = s % (24 * 60 * 60 // c)
         AsyncTimer(s, send_song)
 
     start_song_timer()
