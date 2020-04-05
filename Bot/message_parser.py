@@ -148,7 +148,7 @@ def init(client):
         else:
             await context.send("Insufficient permissions.")
 
-    @client.command(aliases=['hm' + 'm' * i for i in range(2000)], pass_context=True)
+    @client.command(aliases=['h' + 'm' * i for i in range(2000)], pass_context=True)
     async def how_many(context):
         m = context.message
         if len(m.mentions) == 0:
