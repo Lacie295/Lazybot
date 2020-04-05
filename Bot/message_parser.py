@@ -114,16 +114,13 @@ def init(client):
                 r'(?:/?|[/?]\S+)$', re.IGNORECASE)
             if re.match(regex, url) is not None:
                 if not db_handler.has_song(url):
-                    if db_handler.count_song(m.author.name) < 20:
-                        comment = ""
-                        pos2 = m.content[pos1:].strip().find(" ")
-                        if pos2 > 0:
-                            comment = m.content[pos2 + pos1 + 2:].strip()
+                    comment = ""
+                    pos2 = m.content[pos1:].strip().find(" ")
+                    if pos2 > 0:
+                        comment = m.content[pos2 + pos1 + 2:].strip()
 
-                        db_handler.add_song_to_queue(url, m.author.name, comment)
-                        await context.send("Added!")
-                    else:
-                        await context.send("You have exceeded the song cap.")
+                    db_handler.add_song_to_queue(url, m.author.name, comment)
+                    await context.send("Added!")
                 else:
                     await context.send("This song is already submitted!")
             else:

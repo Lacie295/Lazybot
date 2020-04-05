@@ -82,7 +82,6 @@ def count_song(user=None):
         for s in db['songs']:
             if s[1] == user:
                 c += 1
-        print(c)
         return c
 
 
@@ -94,12 +93,11 @@ def list_songs(user):
     return songs.strip()
 
 
-def get_servers():
-    print(db['channels'])
+def get_channels():
     return db['channels']
 
 
 async def send_all(client, msg):
-    for ch in get_servers():
+    for ch in get_channels():
         channel = client.get_channel(ch)
         await channel.send(msg)
