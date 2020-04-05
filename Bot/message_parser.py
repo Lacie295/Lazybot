@@ -1,19 +1,13 @@
 # created by Sami Bosch on Wednesday, 31 October 2018
 
 # This file contains all functions necessary to reply to messages
-import asyncio
-import random
 import re
 from datetime import datetime, timedelta
-from math import ceil, floor
 
 import discord
-import logging
 
 import db_handler
-import logger
 from asynctimer import AsyncTimer
-from utils import elem_in_string
 
 commands = ['yo bot', 'yea bot', 'yea boi']
 
@@ -142,7 +136,6 @@ def init(client):
         m = context.message
         if m.author.guild_permissions.administrator:
             if len(m.channel_mentions) > 0:
-                print(m.channel_mentions)
                 db_handler.set_channel(m.channel_mentions[0].id)
                 await context.send("Channel {} configured.".format(m.channel_mentions[0].mention))
             else:
@@ -181,35 +174,24 @@ def init(client):
 
     def secs():
         x = datetime.today()
-        x_temp = x.replace(hour=12, minute=0, second=0, microsecond=0)
+        x_temp = x.replace(hour=18, minute=50, second=0, microsecond=0)
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
 
-        cnt = ceil(db_handler.count_song() / 15)
-        interval = day_length / cnt
-        cnt = ceil(delta_t.seconds / interval)
-        next_song = delta_t.seconds - (cnt - 1) * interval
+        return delta_t.seconds + 1
 
-        return delta_t.seconds + 1, cnt, interval, next_song
-
-    async def send_song(timer=True):
-        s, c, i, n = secs()
-        print(secs())
-
-        if timer:
-            AsyncTimer(s, send_song)
-            await asyncio.sleep(n)
-        for _ in range(c):
-            print(secs())
-            song = db_handler.get_song()
-            if song is None:
-                logger.info("not sending song")
-                await db_handler.send_all(client, "No daily song today. :(")
-                break
+    async def send_song():
+        song = db_handler.get_song()
+        if song is None:
+            await db_handler.send_all(client, "No daily song today.")
+        else:
             url, author, comment, _ = song
-            logger.info("sending song")
             await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author, comment))
-            if timer:
-                await asyncio.sleep(i)
 
-    AsyncTimer(0, send_song)
+    def start_song_timer():
+        count = db_handler.count_song() // 15 + 1
+        s = secs()
+        s = s % (24 * 60 * 60 // count)
+        AsyncTimer(s, send_song)
+
+    start_song_timer()
