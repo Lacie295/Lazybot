@@ -177,7 +177,7 @@ def init(client):
         y = x_temp if x_temp > x else x_temp + timedelta(days=1)
         delta_t = y - x
 
-        return delta_t.seconds + 1
+        return delta_t.seconds
 
     async def send_song(force=False):
         if secs() > 24 * 60 * 60 - 300:
@@ -194,7 +194,7 @@ def init(client):
     def start_song_timer():
         c = count[0] // 15 + 1
         s = secs()
-        s = s % (24 * 60 * 60 // c)
+        s = s % (24 * 60 * 60 // c) + 1
         print(c, s)
         AsyncTimer(s, send_song)
 
