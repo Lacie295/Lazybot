@@ -146,7 +146,7 @@ def init(client):
     async def force_send(context):
         m = context.message
         if m.author.guild_permissions.administrator:
-            await send_song(False)
+            await send_song()
         else:
             await context.send("Insufficient permissions.")
 
@@ -195,6 +195,7 @@ def init(client):
         s = secs()
         s = s % (24 * 60 * 60 // c)
         print(c, s)
+        AsyncTimer(0, send_song)
         AsyncTimer(s, send_song)
 
     start_song_timer()
