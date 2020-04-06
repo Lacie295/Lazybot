@@ -195,7 +195,6 @@ def init(client):
         s = secs()
         s = s % (24 * 60 * 60 // c)
         print(c, s)
-        AsyncTimer(0, send_song)
         AsyncTimer(s, send_song)
 
     start_song_timer()
