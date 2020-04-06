@@ -146,7 +146,7 @@ def init(client):
     async def force_send(context):
         m = context.message
         if m.author.guild_permissions.administrator:
-            await send_song()
+            await send_song(True)
         else:
             await context.send("Insufficient permissions.")
 
@@ -179,7 +179,7 @@ def init(client):
 
         return delta_t.seconds + 1
 
-    async def send_song():
+    async def send_song(force=False):
         if secs() > 24 * 60 * 60 - 300:
             count[0] = db_handler.count_song()
         song = db_handler.get_song()
@@ -188,7 +188,8 @@ def init(client):
         else:
             url, author, comment, _ = song
             await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author, comment))
-        start_song_timer()
+        if not force:
+            start_song_timer()
 
     def start_song_timer():
         c = count[0] // 15 + 1
