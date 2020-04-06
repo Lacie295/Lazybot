@@ -188,11 +188,13 @@ def init(client):
         else:
             url, author, comment, _ = song
             await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author, comment))
+        start_song_timer()
 
     def start_song_timer():
         c = count[0] // 15 + 1
         s = secs()
         s = s % (24 * 60 * 60 // c)
+        print(c, s)
         AsyncTimer(s, send_song)
 
     start_song_timer()
