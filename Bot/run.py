@@ -3,11 +3,8 @@
 # This file contains all functions necessary to start up the bot
 from datetime import datetime
 
-import discord
 from discord.ext.commands import Bot
 
-import db_handler
-from asynctimer import AsyncTimer
 from message_parser import init
 
 

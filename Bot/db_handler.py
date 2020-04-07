@@ -5,7 +5,6 @@
 import json
 import os
 
-import discord
 import numpy
 
 songs = '../songlist.json'
