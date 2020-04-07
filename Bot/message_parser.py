@@ -126,6 +126,7 @@ def init(client):
                         await context.send("{} is already submitted!".format(url))
                 else:
                     await context.send("{} is not a valid URL.".format(url))
+                i += 1
         else:
             await context.send("Please give at least an URL.")
 
