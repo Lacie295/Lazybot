@@ -167,6 +167,7 @@ def init(client):
         if m.author.guild_permissions.administrator:
             if len(m.channel_mentions) > 0:
                 db_handler.exclude_channel(m.channel_mentions[0].id)
+                await context.send("Excluded {}".format(m.channel_mentions[0].mention))
             else:
                 await context.send("Please provide a channel")
         else:
@@ -178,8 +179,18 @@ def init(client):
         if m.author.guild_permissions.administrator:
             if len(m.channel_mentions) > 0:
                 db_handler.enable_channel(m.channel_mentions[0].id)
+                await context.send("Enabled {}".format(m.channel_mentions[0].mention))
             else:
                 await context.send("Please provide a channel")
+        else:
+            await context.send("Insufficient permissions.")
+
+    @client.command(pass_context=True)
+    async def list_excluded(context):
+        m = context.message
+        if m.author.guild_permissions.administrator:
+            s = "\n".join([client.get_channel(ch).mention for ch in db_handler.get_excluded()])
+            await context.send(s)
         else:
             await context.send("Insufficient permissions.")
 
@@ -190,10 +201,11 @@ def init(client):
                 message.channel.id not in db_handler.get_excluded():
             r = random.randint(0, 255)
             print(r)
-            if r < 10:
+            if r < 20:
                 m = random.choice(client.cached_messages)
                 print(m)
-                await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
+                if m.channel not in db_handler.get_excluded():
+                    await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
         sys.stdout.flush()
         await client.process_commands(message)
 
