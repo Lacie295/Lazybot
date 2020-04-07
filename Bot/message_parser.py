@@ -208,7 +208,7 @@ def init(client):
                 m = random.choice(client.cached_messages)
                 print(m)
                 if m.channel.id not in db_handler.get_excluded():
-                    await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
+                    await message.channel.send(m.clean_content, files=[await a.to_file() for a in m.attachments])
         sys.stdout.flush()
         await client.process_commands(message)
 
