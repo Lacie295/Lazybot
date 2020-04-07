@@ -202,6 +202,7 @@ def init(client):
     @client.event
     async def on_message(message):
         """responding to non command messages"""
+        print(type(message.channel))
         if not message.content.startswith("!") and message.author != client.user and \
                 message.channel.id not in db_handler.get_excluded():
             r = random.randint(0, 255)
@@ -209,7 +210,7 @@ def init(client):
             if r < 20:
                 m = random.choice(client.cached_messages)
                 print(m)
-                if m.channel.id not in db_handler.get_excluded():
+                if m.channel.id not in db_handler.get_excluded() and isinstance(m.channel, discord.channel.TextChannel):
                     await message.channel.send(m.clean_content, files=[await a.to_file() for a in m.attachments])
         sys.stdout.flush()
         await client.process_commands(message)
