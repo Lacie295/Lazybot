@@ -164,14 +164,15 @@ def init(client):
     @client.event
     async def on_message(message):
         """responding to non command messages"""
+        print("AAAAAAAAAAAa")
         if message.author != client.user:
             r = random.randint(0, 255)
             print(r)
             if r < 10:
                 m = random.choice(client.cached_messages)
                 print(m)
-                sys.stdout.flush()
                 await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
+        sys.stdout.flush()
         await client.process_commands(message)
 
     def secs():
