@@ -116,7 +116,7 @@ def init(client):
                 url = split[i]
                 if re.match(regex, url):
                     comment = ""
-                    if not re.match(regex, split[i + 1]):
+                    if i + 1 < len(split) and not re.match(regex, split[i + 1]):
                         comment = split[i + 1]
                         i += 1
                     if not db_handler.has_song(url):
