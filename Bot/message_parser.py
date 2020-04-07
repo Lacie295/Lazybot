@@ -204,7 +204,7 @@ def init(client):
                 message.channel.id not in db_handler.get_excluded():
             r = random.randint(0, 255)
             print(r)
-            if r < 255:
+            if r < 20:
                 m = random.choice(client.cached_messages)
                 print(m)
                 if m.channel.id not in db_handler.get_excluded():
