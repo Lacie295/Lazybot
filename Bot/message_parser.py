@@ -202,7 +202,6 @@ def init(client):
     @client.event
     async def on_message(message):
         """responding to non command messages"""
-        print(type(message.channel))
         if not message.content.startswith("!") and message.author != client.user and \
                 message.channel.id not in db_handler.get_excluded():
             r = random.randint(0, 255)
