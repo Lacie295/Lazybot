@@ -164,7 +164,6 @@ def init(client):
     @client.event
     async def on_message(message):
         """responding to non command messages"""
-        print("AAAAAAAAAAAa")
         if message.author != client.user:
             r = random.randint(0, 255)
             print(r)
@@ -200,6 +199,7 @@ def init(client):
         s = secs()
         s = s % (24 * 60 * 60 // c) + 1
         print(c, s)
+        sys.stdout.flush()
         AsyncTimer(s, send_song)
 
     start_song_timer()
