@@ -166,8 +166,9 @@ def init(client):
         m = context.message
         if m.author.guild_permissions.administrator:
             if len(m.channel_mentions) > 0:
-                db_handler.exclude_channel(m.channel_mentions[0].id)
-                await context.send("Excluded {}".format(m.channel_mentions[0].mention))
+                for ch in m.channel_mentions:
+                    db_handler.exclude_channel(ch.id)
+                    await context.send("Excluded {}".format(ch.mention))
             else:
                 await context.send("Please provide a channel")
         else:
@@ -178,8 +179,9 @@ def init(client):
         m = context.message
         if m.author.guild_permissions.administrator:
             if len(m.channel_mentions) > 0:
-                db_handler.enable_channel(m.channel_mentions[0].id)
-                await context.send("Enabled {}".format(m.channel_mentions[0].mention))
+                for ch in m.channel_mentions:
+                    db_handler.enable_channel(ch.id)
+                    await context.send("Enabled {}".format(ch.mention))
             else:
                 await context.send("Please provide a channel")
         else:
