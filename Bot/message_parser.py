@@ -116,9 +116,10 @@ def init(client):
                 url = split[i]
                 if re.match(regex, url):
                     comment = ""
-                    if i + 1 < len(split) and not re.match(regex, split[i + 1]):
-                        comment = split[i + 1]
+                    while i + 1 < len(split) and not re.match(regex, split[i + 1]):
+                        comment += split[i + 1] + " "
                         i += 1
+                    comment = comment.strip()
                     if not db_handler.has_song(url):
                         db_handler.add_song_to_queue(url, m.author.name, comment)
                         await context.send("Added {}! Comment: {}".format(url, comment if len(comment) > 0 else "None"))
