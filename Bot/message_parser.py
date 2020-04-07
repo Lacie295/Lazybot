@@ -9,6 +9,7 @@ import random
 
 import db_handler
 from asynctimer import AsyncTimer
+import sys
 
 
 def init(client):
@@ -169,6 +170,7 @@ def init(client):
             if r < 10:
                 m = random.choice(client.cached_messages)
                 print(m)
+                sys.stdout.flush()
                 await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
         await client.process_commands(message)
 
