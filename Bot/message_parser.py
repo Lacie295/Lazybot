@@ -102,9 +102,8 @@ def init(client):
     @client.command(aliases=['qs'], pass_context=True)
     async def queue_song(context):
         m = context.message
-        pos1 = m.content.find(" ")
-        if pos1 > 0:
-            url = m.content.split(" ")[1]
+        split = m.content.split(" ")
+        if len(split) > 0:
             regex = re.compile(
                 r'^(?:http|ftp)s?://'  # http:// or https://
                 r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
@@ -112,19 +111,21 @@ def init(client):
                 r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
                 r'(?::\d+)?'  # optional port
                 r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-            if re.match(regex, url) is not None:
-                if not db_handler.has_song(url):
+            i = 1
+            while i < len(split):
+                url = split[i]
+                if re.match(regex, url):
                     comment = ""
-                    pos2 = m.content[pos1:].strip().find(" ")
-                    if pos2 > 0:
-                        comment = m.content[pos2 + pos1 + 2:].strip()
-
-                    db_handler.add_song_to_queue(url, m.author.name, comment)
-                    await context.send("Added!")
+                    if not re.match(regex, split[i + 1]):
+                        comment = split[i + 1]
+                        i += 1
+                    if not db_handler.has_song(url):
+                        db_handler.add_song_to_queue(url, m.author.name, comment)
+                        await context.send("Added {}! Comment: {}".format(url, comment if len(comment) > 0 else "None"))
+                    else:
+                        await context.send("{} is already submitted!".format(url))
                 else:
-                    await context.send("This song is already submitted!")
-            else:
-                await context.send("Please provide a valid URL.")
+                    await context.send("{} is not a valid URL.".format(url))
         else:
             await context.send("Please give at least an URL.")
 
@@ -203,10 +204,10 @@ def init(client):
                 message.channel.id not in db_handler.get_excluded():
             r = random.randint(0, 255)
             print(r)
-            if r < 20:
+            if r < 255:
                 m = random.choice(client.cached_messages)
                 print(m)
-                if m.channel not in db_handler.get_excluded():
+                if m.channel.id not in db_handler.get_excluded():
                     await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
         sys.stdout.flush()
         await client.process_commands(message)
@@ -227,7 +228,7 @@ def init(client):
             await db_handler.send_all(client, "No daily song today.")
         else:
             url, author, comment, _ = song
-            await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author, comment))
+            await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author , comment))
         if not force:
             start_song_timer()
 
