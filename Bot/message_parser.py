@@ -161,16 +161,39 @@ def init(client):
     async def list_songs(context):
         await context.send(db_handler.list_songs(context.message.author.name))
 
+    @client.command(pass_context=True)
+    async def exclude_channel(context):
+        m = context.message
+        if m.author.guild_permissions.administrator:
+            if len(m.channel_mentions) > 0:
+                db_handler.exclude_channel(m.channel_mentions[0].id)
+            else:
+                await context.send("Please provide a channel")
+        else:
+            await context.send("Insufficient permissions.")
+
+    @client.command(pass_context=True)
+    async def allow_channel(context):
+        m = context.message
+        if m.author.guild_permissions.administrator:
+            if len(m.channel_mentions) > 0:
+                db_handler.enable_channel(m.channel_mentions[0].id)
+            else:
+                await context.send("Please provide a channel")
+        else:
+            await context.send("Insufficient permissions.")
+
     @client.event
     async def on_message(message):
         """responding to non command messages"""
-        if not message.content.startswith("!") and message.author != client.user:
-                r = random.randint(0, 255)
-                print(r)
-                if r < 10:
-                    m = random.choice(client.cached_messages)
-                    print(m)
-                    await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
+        if not message.content.startswith("!") and message.author != client.user and \
+                message.channel.id not in db_handler.get_excluded():
+            r = random.randint(0, 255)
+            print(r)
+            if r < 10:
+                m = random.choice(client.cached_messages)
+                print(m)
+                await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
         sys.stdout.flush()
         await client.process_commands(message)
 

@@ -12,7 +12,7 @@ dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, songs)
 if not os.path.exists(filename):
     with open(filename, "w+") as f:
-        json.dump({"songs": [], "channels": []}, f)
+        json.dump({"songs": [], "channels": [], "excluded": []}, f)
         f.truncate()
         f.close()
 
@@ -25,6 +25,9 @@ if "songs" not in db:
 
 if "channels" not in db:
     db['channels'] = []
+
+if "excluded" not in db:
+    db['excluded'] = []
 
 
 def write():
@@ -99,3 +102,17 @@ async def send_all(client, msg):
     for ch in get_channels():
         channel = client.get_channel(ch)
         await channel.send(msg)
+
+
+def exclude_channel(ch):
+    db['excluded'].append(ch)
+    write()
+
+
+def enable_channel(ch):
+    db['excluded'].remove(ch)
+    write()
+
+
+def get_excluded():
+    return db['excluded']
