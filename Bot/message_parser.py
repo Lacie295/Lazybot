@@ -166,7 +166,7 @@ def init(client):
         if message.author != client.user:
             r = random.randint(0, 255)
             print(r)
-            if r < 2:
+            if r < 10:
                 m = random.choice(client.cached_messages)
                 print(m)
                 await message.channel.send(m.content)
