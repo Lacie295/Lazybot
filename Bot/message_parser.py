@@ -10,10 +10,6 @@ import random
 import db_handler
 from asynctimer import AsyncTimer
 
-commands = ['yo bot', 'yea bot', 'yea boi']
-
-day_length = 24*60*60
-
 
 def init(client):
     count = [db_handler.count_song()]
@@ -168,8 +164,12 @@ def init(client):
     async def on_message(message):
         """responding to non command messages"""
         if message.author != client.user:
-            if True in [com in message.content for com in commands]:
-                await message.channel.send(random.choice(client.cached_messages).content)
+            r = random.randint(0, 255)
+            print(r)
+            if r < 2:
+                m = random.choice(client.cached_messages)
+                print(m)
+                await message.channel.send(m.content)
         await client.process_commands(message)
 
     def secs():
