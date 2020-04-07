@@ -122,9 +122,9 @@ def init(client):
                     comment = comment.strip()
                     if not db_handler.has_song(url):
                         db_handler.add_song_to_queue(url, m.author.name, comment)
-                        await context.send("Added {}! Comment: {}".format(url, comment if len(comment) > 0 else "None"))
+                        await context.send("Added <{}>! Comment: {}".format(url, comment if len(comment) > 0 else "None"))
                     else:
-                        await context.send("{} is already submitted!".format(url))
+                        await context.send("<{}> is already submitted!".format(url))
                 else:
                     await context.send("{} is not a valid URL.".format(url))
                 i += 1
