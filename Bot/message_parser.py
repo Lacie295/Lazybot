@@ -169,7 +169,7 @@ def init(client):
             if r < 10:
                 m = random.choice(client.cached_messages)
                 print(m)
-                await message.channel.send(m.content)
+                await message.channel.send(m.content, files=[await a.to_file() for a in m.attachments])
         await client.process_commands(message)
 
     def secs():
