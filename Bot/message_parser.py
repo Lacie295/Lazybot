@@ -210,12 +210,13 @@ def init(client):
             print(r)
             if client.user in message.mentions or r < 20:
                 async with message.channel.typing():
-                    m = random.choice(client.cached_messages)
+                    m = random.choice([cm for cm in client.cached_messages if
+                                       cm.channel.id not in db_handler.get_excluded()
+                                       and isinstance(cm.channel, discord.channel.TextChannel)
+                                       and client.user not in message.mentions])
                     await asyncio.sleep(len(m.clean_content) * 0.1)
                     print(m)
-                    if m.channel.id not in db_handler.get_excluded() and isinstance(m.channel,
-                                                                                    discord.channel.TextChannel):
-                        await message.channel.send(m.clean_content, files=[await a.to_file() for a in m.attachments])
+                    await message.channel.send(m.clean_content, files=[await a.to_file() for a in m.attachments])
         sys.stdout.flush()
         await client.process_commands(message)
 
