@@ -213,7 +213,7 @@ def init(client):
                     m = random.choice([cm for cm in client.cached_messages if
                                        cm.channel.id not in db_handler.get_excluded()
                                        and isinstance(cm.channel, discord.channel.TextChannel)
-                                       and client.user not in message.mentions])
+                                       and client.user not in cm.mentions])
                     await asyncio.sleep(len(m.clean_content) * 0.1)
                     print(m)
                     await message.channel.send(m.clean_content, files=[await a.to_file() for a in m.attachments])
