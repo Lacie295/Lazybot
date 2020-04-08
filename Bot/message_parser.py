@@ -1,6 +1,7 @@
 # created by Sami Bosch on Wednesday, 31 October 2018
 
 # This file contains all functions necessary to reply to messages
+import asyncio
 import re
 from datetime import datetime, timedelta
 
@@ -122,7 +123,8 @@ def init(client):
                     comment = comment.strip()
                     if not db_handler.has_song(url):
                         db_handler.add_song_to_queue(url, m.author.name, comment)
-                        await context.send("Added <{}>! Comment: {}".format(url, comment if len(comment) > 0 else "None"))
+                        await context.send(
+                            "Added <{}>! Comment: {}".format(url, comment if len(comment) > 0 else "None"))
                     else:
                         await context.send("<{}> is already submitted!".format(url))
                 else:
@@ -206,11 +208,14 @@ def init(client):
                 message.channel.id not in db_handler.get_excluded():
             r = random.randint(0, 255)
             print(r)
-            if r < 20:
-                m = random.choice(client.cached_messages)
-                print(m)
-                if m.channel.id not in db_handler.get_excluded() and isinstance(m.channel, discord.channel.TextChannel):
-                    await message.channel.send(m.clean_content, files=[await a.to_file() for a in m.attachments])
+            if client.user in message.mentions or r < 20:
+                async with message.channel.typing():
+                    m = random.choice(client.cached_messages)
+                    await asyncio.sleep(len(m.clean_content) * 0.1)
+                    print(m)
+                    if m.channel.id not in db_handler.get_excluded() and isinstance(m.channel,
+                                                                                    discord.channel.TextChannel):
+                        await message.channel.send(m.clean_content, files=[await a.to_file() for a in m.attachments])
         sys.stdout.flush()
         await client.process_commands(message)
 
@@ -230,7 +235,7 @@ def init(client):
             await db_handler.send_all(client, "No daily song today.")
         else:
             url, author, comment, _ = song
-            await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author , comment))
+            await db_handler.send_all(client, "Daily song: {}\n Submitted by {}\n{}".format(url, author, comment))
         if not force:
             start_song_timer()
 
