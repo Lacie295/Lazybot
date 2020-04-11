@@ -245,7 +245,7 @@ def init(client):
     def start_song_timer():
         c = count[0] // 15 + 1
         s = secs()
-        s = s % (24 * 60 * 60 // c) + 1 if s < 1.5 * 24 * 60 * 60 // c else s
+        s = s % (24 * 60 * 60 // c) + 1 if s > 1.5 * 24 * 60 * 60 // c else s
         print(c, s)
         sys.stdout.flush()
         AsyncTimer(s, send_song)
