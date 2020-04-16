@@ -335,7 +335,7 @@ def init(client):
 
             pin = False
 
-            ok_emote = 700339820777701458
+            ok_emote = 693404150662430750
 
             print(client.get_emoji(ok_emote))
             sys.stdout.flush()
@@ -343,7 +343,6 @@ def init(client):
             if payload.emoji.is_custom_emoji() and payload.emoji.id == ok_emote:
                 if member.guild_permissions.manage_messages:
                     pin = True
-                await message.remove_reaction(client.get_emoji(ok_emote), member)
 
             for reaction in message.reactions:
                 emoji = reaction.emoji
