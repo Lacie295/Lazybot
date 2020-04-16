@@ -340,14 +340,17 @@ def init(client):
                     pin = True
                 await message.remove_reaction("🆗", member)
 
+            ok_emote = 700339820777701458
+
             for reaction in message.reactions:
                 emoji = reaction.emoji
-                if emoji == "🆗" or (type(emoji) == PartialEmoji and emoji.is_unicode_emoji() and emoji.name == "🆗"):
+                if not isinstance(emoji, str) and emoji.id == ok_emote:
                     users = await reaction.users().flatten()
                     if client.user in users:
                         pin = False
                         break
-                elif isinstance(db_handler.get_pin_emote(), int) and not isinstance(emoji, str) and emoji.id == db_handler.get_pin_emote() and reaction.count >= db_handler.get_pin_amount():
+                elif isinstance(db_handler.get_pin_emote(), int) and not isinstance(emoji, str) and\
+                        emoji.id == db_handler.get_pin_emote() and reaction.count >= db_handler.get_pin_amount():
                     pin = True
                 elif (emoji == db_handler.get_pin_emote() or (isinstance(emoji, PartialEmoji)
                                                               and emoji.name == db_handler.get_pin_emote()))\
@@ -357,8 +360,7 @@ def init(client):
             if pin:
                 pin_channel = client.get_channel(db_handler.get_pin_channel())
                 await pin_channel.send(message.clean_content, files=[await a.to_file() for a in message.attachments])
-                await pin_channel.send(message.jump_url)
-                await message.add_reaction("🆗")
+                await message.add_reaction(client.get_emoji(ok_emote))
 
             event.set()
             queue.pop(m)
