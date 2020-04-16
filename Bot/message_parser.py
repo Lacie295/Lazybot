@@ -335,12 +335,12 @@ def init(client):
 
             pin = False
 
-            if payload.emoji.is_unicode_emoji() and payload.emoji.name == "🆗":
+            ok_emote = 700339820777701458
+
+            if payload.emoji.is_custom_emoji() and payload.emoji.id == ok_emote:
                 if member.guild_permissions.manage_messages:
                     pin = True
-                await message.remove_reaction("🆗", member)
-
-            ok_emote = 700339820777701458
+                await message.remove_reaction(client.get_emoji(ok_emote), member)
 
             for reaction in message.reactions:
                 emoji = reaction.emoji
