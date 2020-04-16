@@ -8,9 +8,13 @@ from datetime import datetime, timedelta
 import discord
 import random
 
+from discord import PartialEmoji
+
 import db_handler
 from asynctimer import AsyncTimer
 import sys
+
+queue = {}
 
 
 def init(client):
@@ -201,6 +205,67 @@ def init(client):
         else:
             await context.send("Insufficient permissions.")
 
+    @client.command(pass_context=True)
+    async def set_pin_channel(context):
+        """Takes a channel reference and sets it as the default channel to post pins to."""
+        m = context.message
+
+        if m.author.guild_permissions.administrator:
+            if m.channel_mentions:
+                channel = m.channel_mentions[0]
+                db_handler.set_pin_channel(channel.id)
+                await context.send("Pin channel set to {}".format(channel.name))
+            else:
+                await context.send("Please provide a channel.")
+        else:
+            await context.send("You do not have permission to set channels.")
+
+    @client.command(pass_context=True)
+    async def set_pin_emote(context):
+        """Takes an emote and sets it as the default emote to check for pins."""
+        m = context.message
+
+        if m.author.guild_permissions.administrator:
+            split = m.content.split(" ")
+            if len(split) == 2:
+                text = split[1]
+                if re.match(r"^<:\w+:\d+>$", text):
+                    emoji_id = int(text.split(":")[2][:-1])
+                    db_handler.set_pin_emote(emoji_id)
+                    emoji = client.get_emoji(emoji_id)
+                    print(emoji.name)
+                    await m.add_reaction(emoji)
+                    await context.send("Emoji <:{}:{}> set as default.".format(emoji.name, emoji.id))
+                elif text == "default":
+                    db_handler.set_pin_emote("⭐")
+                    await m.add_reaction("⭐")
+                    await context.send("Emoji ⭐ set as default.")
+                else:
+                    await context.send("Please provide a valid emote.")
+            else:
+                await context.send("Please provide an emote.")
+        else:
+            await context.send("You do not have permission to set emotes.")
+
+    @client.command(pass_context=True)
+    async def set_pin_number(context):
+        """Sets the amount of emotes required for a message to be pinned."""
+        m = context.message
+
+        if m.author.guild_permissions.administrator:
+            split = m.content.split(" ")
+            if len(split) == 2:
+                text = split[1]
+                if re.match(r"\d+$", text):
+                    db_handler.set_pin_amount(int(text))
+                    await context.send("Emotes required for a message to be pinned set to {}.".format(text))
+                else:
+                    await context.send("Please provide a valid number.")
+            else:
+                await context.send("Please provide a number.")
+        else:
+            await context.send("You do not have permission to set channels.")
+
     @client.event
     async def on_message(message):
         """responding to non command messages"""
@@ -251,3 +316,49 @@ def init(client):
         AsyncTimer(s, send_song)
 
     start_song_timer()
+
+    @client.event
+    async def on_raw_reaction_add(payload):
+        if payload.user_id == client.user.id or payload.channel_id == db_handler.get_pin_channel():
+            pass
+        else:
+            m = payload.message_id
+            event = asyncio.Event()
+            while m in queue:
+                await queue[m].wait()
+
+            queue[m] = event
+            guild = client.get_guild(payload.guild_id)
+            channel = guild.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+            member = guild.get_member(payload.user_id)
+
+            pin = False
+
+            if payload.emoji.is_unicode_emoji() and payload.emoji.name == "🆗":
+                if member.guild_permissions.manage_messages:
+                    pin = True
+                await message.remove_reaction("🆗", member)
+
+            for reaction in message.reactions:
+                emoji = reaction.emoji
+                if emoji == "🆗" or (type(emoji) == PartialEmoji and emoji.is_unicode_emoji() and emoji.name == "🆗"):
+                    users = await reaction.users().flatten()
+                    if client.user in users:
+                        pin = False
+                        break
+                elif isinstance(db_handler.get_pin_emote(), int) and not isinstance(emoji, str) and emoji.id == db_handler.get_pin_emote() and reaction.count >= db_handler.get_pin_amount():
+                    pin = True
+                elif (emoji == db_handler.get_pin_emote() or (isinstance(emoji, PartialEmoji)
+                                                              and emoji.name == db_handler.get_pin_emote()))\
+                        and reaction.count >= db_handler.get_pin_amount():
+                    pin = True
+
+            if pin:
+                pin_channel = client.get_channel(db_handler.get_pin_channel())
+                await pin_channel.send(message.clean_content, files=[await a.to_file() for a in message.attachments])
+                await pin_channel.send(message.jump_url)
+                await message.add_reaction("🆗")
+
+            event.set()
+            queue.pop(m)

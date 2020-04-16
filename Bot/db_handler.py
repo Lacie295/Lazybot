@@ -12,7 +12,7 @@ dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, songs)
 if not os.path.exists(filename):
     with open(filename, "w+") as f:
-        json.dump({"songs": [], "channels": [], "excluded": []}, f)
+        json.dump({"songs": [], "channels": [], "excluded": [], "pin": [None, ":star:", 5]}, f)
         f.truncate()
         f.close()
 
@@ -28,6 +28,9 @@ if "channels" not in db:
 
 if "excluded" not in db:
     db['excluded'] = []
+
+if "pin" not in db:
+    db['pin'] = [None, ":star:", 5]
 
 
 def write():
@@ -116,3 +119,30 @@ def enable_channel(ch):
 
 def get_excluded():
     return db['excluded']
+
+
+def set_pin_channel(cid):
+    db['pin'][0] = cid
+    write()
+
+
+def get_pin_channel():
+    return db['pin'][0]
+
+
+def set_pin_emote(eid):
+    db['pin'][1] = eid
+    write()
+
+
+def get_pin_emote():
+    return db['pin'][1]
+
+
+def set_pin_amount(n):
+    db['pin'][2] = n
+    write()
+
+
+def get_pin_amount():
+    return db['pin'][2]
