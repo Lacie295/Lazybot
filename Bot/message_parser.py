@@ -337,6 +337,9 @@ def init(client):
 
             ok_emote = 700339820777701458
 
+            print(client.get_emoji(ok_emote))
+            sys.stdout.flush()
+
             if payload.emoji.is_custom_emoji() and payload.emoji.id == ok_emote:
                 if member.guild_permissions.manage_messages:
                     pin = True
