@@ -12,7 +12,8 @@ dirname = os.path.dirname(__file__)
 filename = os.path.join(dirname, songs)
 if not os.path.exists(filename):
     with open(filename, "w+") as f:
-        json.dump({"songs": [], "channels": [], "excluded": [], "pin": [None, ":star:", 5]}, f)
+        json.dump(
+            {"songs": [], "channels": [], "excluded": [], "pin": [None, ":star:", 5], "minecraft": {"chests": {}}}, f)
         f.truncate()
         f.close()
 
@@ -31,6 +32,9 @@ if "excluded" not in db:
 
 if "pin" not in db:
     db['pin'] = [None, ":star:", 5]
+
+if "minecraft" not in db:
+    db['minecraft'] = {"chests": {}}
 
 
 def write():
@@ -146,3 +150,28 @@ def set_pin_amount(n):
 
 def get_pin_amount():
     return db['pin'][2]
+
+
+def reserve_chest(uid, colour):
+    db['minecraft']['chests'][colour] = uid
+    write()
+
+
+def get_owner(colour):
+    if colour in db['minecraft']['chests']:
+        return db['minecraft']['chests'][colour]
+    else:
+        return None
+
+
+def free_chest(colour):
+    if colour in db['minecraft']['chests']:
+        db['minecraft']['chests'].pop(colour)
+        write()
+        return 1
+    else:
+        return 0
+
+
+def get_chests():
+    return db['minecraft']['chests']

@@ -16,6 +16,25 @@ import sys
 
 queue = {}
 
+colours = {
+    "W": "white",
+    "R": "red",
+    "G": "green",
+    "B": "blue",
+    "Y": "yellow",
+    "M": "magenta",
+    "C": "cyan",
+    "K": "black",
+    "P": "purple",
+    "LG": "light gray",
+    "GR": "gray",
+    "PI": "pink",
+    "L": "lime",
+    "LB": "light blue",
+    "O": "orange",
+    "BR": "brown",
+}
+
 
 def init(client):
     count = [db_handler.count_song()]
@@ -266,6 +285,82 @@ def init(client):
         else:
             await context.send("You do not have permission to set channels.")
 
+    @client.command(pass_context=True)
+    async def reserve_chest(context):
+        """Reserves a colour. Channels are given by colour|colour|colour. A colour can be any of the following:
+        - W (white)
+        - R (red)
+        - G (green)
+        - B (blue)
+        - Y (yellow)
+        - M (magenta)
+        - C (cyan)
+        - K (black)
+        - P (purple)
+        - LG (light gray)
+        - GR (gray)
+        - PI (pink)
+        - L (lime)
+        - LB (light blue)
+        - O (orange)
+        - BR (brown)"""
+        m = context.message
+        split = m.content.split(" ")
+
+        if len(split) > 1:
+            channel = "|".join(split[1:]).split("|")
+            if all(c in colours for c in channel):
+                chest = "|".join(channel)
+                if db_handler.get_owner(chest):
+                    await context.send("Channel " + chest + " is already reserved.")
+                else:
+                    db_handler.reserve_chest(m.author.id, chest)
+                    await context.send("Channel " + chest + " reserved.")
+            else:
+                await context.send("Incorrect colours. Please check !help reserve_chest for a list of colours.")
+
+    @client.command(pass_context=True)
+    async def free_chest(context):
+        """Frees a colour. Channels are given by colour|colour|colour. A colour can be any of the following:
+        - W (white)
+        - R (red)
+        - G (green)
+        - B (blue)
+        - Y (yellow)
+        - M (magenta)
+        - C (cyan)
+        - K (black)
+        - P (purple)
+        - LG (light gray)
+        - GR (gray)
+        - PI (pink)
+        - L (lime)
+        - LB (light blue)
+        - O (orange)
+        - BR (brown)"""
+        m = context.message
+        split = m.content.split(" ")
+
+        if len(split) > 1:
+            channel = "|".join(split[1:]).split("|")
+            if all(c in colours for c in channel):
+                chest = "|".join(channel)
+                if db_handler.get_owner(chest) == m.author.id:
+                    db_handler.free_chest(chest)
+                    await context.send("Channel " + chest + " freed.")
+                else:
+                    await context.send("Channel " + chest + " is already free or not owned by you.")
+            else:
+                await context.send("Incorrect colours. Please check !help free_chest for a list of colours.")
+        else:
+            await context.send("Please provide a channel.")
+
+    @client.command(pass_context=True)
+    async def list_chest(context):
+        """Lists reserved channels."""
+        chests = db_handler.get_chests().keys()
+        await context.send("\n".join(chests))
+
     @client.event
     async def on_message(message):
         """responding to non command messages"""
@@ -274,7 +369,7 @@ def init(client):
             r = random.randint(0, 255)
             print(r)
             if client.user in message.mentions or r < 20:
-                await asyncio.sleep(random.randint(0, 255)/100.0)
+                await asyncio.sleep(random.randint(0, 255) / 100.0)
                 async with message.channel.typing():
                     m = random.choice([cm for cm in client.cached_messages if
                                        cm.channel.id not in db_handler.get_excluded()
@@ -351,11 +446,11 @@ def init(client):
                     if client.user in users:
                         pin = False
                         break
-                elif isinstance(db_handler.get_pin_emote(), int) and not isinstance(emoji, str) and\
+                elif isinstance(db_handler.get_pin_emote(), int) and not isinstance(emoji, str) and \
                         emoji.id == db_handler.get_pin_emote() and reaction.count >= db_handler.get_pin_amount():
                     pin = True
                 elif (emoji == db_handler.get_pin_emote() or (isinstance(emoji, PartialEmoji)
-                                                              and emoji.name == db_handler.get_pin_emote()))\
+                                                              and emoji.name == db_handler.get_pin_emote())) \
                         and reaction.count >= db_handler.get_pin_amount():
                     pin = True
 
